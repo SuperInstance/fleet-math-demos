@@ -25,15 +25,16 @@ Simulate N robots forming a geometric pattern using **Zero Holonomy Consensus (Z
 - Cycle analysis identifies *which* robot is the violator
 
 **Test scenarios:**
-- `python swarm.py --shape pentagon` — 5 robots in pentagon, one drifts
-- `python swarm.py --shape grid` — 10 robots in grid, ZHC detects multiple drifters
+- `python swarm.py --shape pentagram` — K5 pentagram, one drifts (rich cycles)
+- `python swarm.py --shape grid` — 10 robots in grid with diagonals
 - `python swarm.py --shape triangle` — 3 robots (Laman-minimal), any drift breaks it
 
 **Sample output:**
 ```
-Step 0: holonomy=0.8200, violator=bot_2 ⚠️  Violation  (confidence=100%)
-Step 1: holonomy=0.4500, violator=bot_2 ⚠️  Violation  (confidence=100%)
-Step 2: holonomy=0.0800, violator=none ✅ Consensus!  (confidence=0%)
+Step  0: h=0.2100  detected= bot_2 ✓  ⚠️  DRIFT  (violations=3)
+Step  1: h=0.2450  detected= bot_2 ✓  ⚠️  DRIFT  (violations=3)
+Step  2: h=0.4636  detected= bot_2 ✓  ⚠️  DRIFT  (violations=3)
+Step  3: h=0.0000  detected= bot_2 ✓  ✅ OK  (violations=0)
 ```
 
 ### 2. Sensor Fault Detection (`sensors.py`)
@@ -68,19 +69,19 @@ N sensors measure the same physical value — ZHC detects which one is faulty.
 **Sample output:**
 ```
 Sensor Readings:
-  s0: 25.12
-  s1: 25.34
-  s2: 35.02 ⚠️
-  s3: 24.89
-  s4: 25.45
+  s0:  24.9568  (z=0.53)
+  s1:  24.9481  (z=0.54)
+  s2:  29.9666  (z=2.00) ⚠️
+  s3:  25.2106  (z=0.40)
+  s4:  24.9617  (z=0.53)
+  mean=26.0088  std=1.9814
 
-Detected faulty sensor(s): ['s2']
-Sensor confidence ranking:
-  s2: 100% ⚠️ FAULTY
-  s0: 14%
-  s1: 14%
-  s3: 0%
-  s4: 0%
+ZHC: ⚠️  BROKEN (5 violations)
+
+Per-node similarity analysis:
+  s2: mean_similarity=0.0844 (fault_score=88.6%) ⚠️ FAULTY
+  s3: mean_similarity=0.6834 (fault_score=7.5%)
+  s1: mean_similarity=0.7368 (fault_score=0.3%)
 ```
 
 ### 3. Robot Arm Constraint Planning (`arm.py`)
@@ -141,8 +142,8 @@ Each script supports `--help` for options.
 | Concept | fleet_math Module | Used In |
 |---------|------------------|---------|
 | Zero Holonomy Consensus | `zhc.ConstraintGraph` | swarm.py, sensors.py |
-| Cycle detection & analysis | `ConstraintGraph.fundamental_cycles()` | swarm.py, sensors.py |
-| Violation localization | `ConstraintGraph.check_consensus()` | swarm.py, sensors.py |
+| Cycle violation detection | `ConstraintGraph.check_consensus()` | swarm.py, sensors.py |
+| Per-node edge-analysis (localization) | `ConstraintGraph.weight()` / `edges` | swarm.py, sensors.py |
 | Laman rigidity check | `laman.is_rigid()` | arm.py |
 | Minimal rigidity check | `laman.is_minimally_rigid()` | arm.py |
 | Rigidity margin | `laman.rigid_margin()` | arm.py |
